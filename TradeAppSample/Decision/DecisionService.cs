@@ -33,7 +33,7 @@ namespace TradeAppSample.Decision
 
             // 現在の価格を取得
             var currentRate = (await rateEndpoints.GetPrices(instrument)).First();
-            if (currentRate.Status == "HALTED")
+            if (currentRate.Status == "halted")
             {
                 result.Halted = true;
                 return result;
@@ -45,10 +45,10 @@ namespace TradeAppSample.Decision
             var rates = await rateEndpoints.GetCandles(instrument, OandaTypes.GranularityType.D, 10);
 
             // 5日間移動平均線の取得
-            var emaLine5d = calculateEmaLine(rates.Candles.Select(c => c.CloseAsk).Cast<decimal>().ToArray(), 5);
+            var emaLine5d = calculateEmaLine(rates.Candles.Select(c => (decimal)c.CloseAsk).ToArray(), 5);
 
-            // 移動平均が上がり(正なら買い、0、負なら売り)
-            result.TradeType = emaLine5d.Average() > 0 ? TradeType.Long : TradeType.Short;
+            // 移動平均が上がりなら買い、下がりなら売り
+            result.TradeType = emaLine5d.First() < emaLine5d.Last() ? TradeType.Long : TradeType.Short;
 
             return result;
         }

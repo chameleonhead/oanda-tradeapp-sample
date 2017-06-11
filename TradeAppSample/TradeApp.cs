@@ -59,6 +59,14 @@ namespace TradeAppSample
                         trader.Trade().Wait();
                     }
                 }
+                catch(AggregateException aggex)
+                {
+                    foreach (var ex in aggex.Flatten().InnerExceptions)
+                    {
+                        Console.Error.WriteLine(ex.Message);
+                        Console.Error.WriteLine(ex.StackTrace);
+                    }
+                }
                 catch (Exception ex)
                 {
                     Console.Error.WriteLine(ex.Message);
@@ -73,7 +81,7 @@ namespace TradeAppSample
         private bool CancelRequested()
         {
             // TODO ファイルを監視したりしてキャンセルできるようにする
-            return true;
+            return false;
         }
     }
 }
