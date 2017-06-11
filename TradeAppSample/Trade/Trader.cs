@@ -6,7 +6,6 @@ using TradeAppSample.Setup;
 using Rabun.Oanda.Rest.Models;
 using TradeAppSample.Common;
 using System.Linq;
-using System.Threading;
 
 namespace TradeAppSample.Trade
 {
@@ -52,7 +51,7 @@ namespace TradeAppSample.Trade
                     currentRate = (await rateEndPoints.GetPrices(instrument)).First();
                     if (currentRate.Status == "halted")
                     {
-                        Thread.Sleep(1 * 60 * 1000);
+                        await Task.Delay(1 * 60 * 1000);
                         continue;
                     }
 
