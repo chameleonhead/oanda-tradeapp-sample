@@ -35,11 +35,12 @@ namespace TradeAppSample.Decision
             var currentRate = (await rateEndpoints.GetPrices(instrument)).First();
             if (currentRate.Status == "halted")
             {
+                result.ShouldTrade = false;
                 result.Halted = true;
                 return result;
             }
             result.Rate = new CurrencyRate(XmlConvert.ToDateTime(currentRate.Time, XmlDateTimeSerializationMode.Local), (decimal)currentRate.Ask, (decimal)currentRate.Bid);
-            Console.WriteLine("{0:yyyy/MM/dd HH:mm:ss} 市場価格: ASK:{1} BID:{2} ({3:yyyy/MM/dd HH:mm:ss}現在)", DateTime.Now, result.Rate.Ask, result.Rate.Bid, result.Rate.Time);
+            Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::市場価格: ASK:{result.Rate.Ask} BID:{result.Rate.Bid} ({result.Rate.Time.ToString("yyyy/MM/dd HH:mm:ss")}現在)");
 
             // 買い・売りを決定
             var rates = await rateEndpoints.GetCandles(instrument, OandaTypes.GranularityType.D, 10);

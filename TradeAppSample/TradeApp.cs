@@ -16,6 +16,7 @@ namespace TradeAppSample
 {
     public class TradeApp
     {
+        private int accountId;
         public TradeApp(string key, int accountId)
         {
             var factory = new DefaultFactory(key, AccountType.practice, accountId);
@@ -24,10 +25,12 @@ namespace TradeAppSample
             RateEndpoints = factory.GetEndpoint<RateEndpoints>();
             TradeEndpoints = factory.GetEndpoint<TradeEndpoints>();
             TransactionEndpoints = factory.GetEndpoint<TransactionEndpoints>();
-            AccountEndPoints = new AccountEndpoints(key, AccountType.practice);
+            AccountEndpoints = new AccountEndpoints(key, AccountType.practice);
+
+            this.accountId = accountId;
         }
 
-        public AccountEndpoints AccountEndPoints { get; private set; }
+        public AccountEndpoints AccountEndpoints { get; private set; }
         public OrderEndpoints OrderEndPoints { get; private set; }
         public PositionEndpoints PositionEndpoints { get; private set; }
         public RateEndpoints RateEndpoints { get; private set; }
@@ -41,7 +44,7 @@ namespace TradeAppSample
         {
             var instrument = "USD_JPY";
             var decisionService = new DecisionService(instrument, RateEndpoints);
-            var setupService = new SetupService(instrument, AccountEndPoints, RateEndpoints);
+            var setupService = new SetupService(instrument, accountId, AccountEndpoints, RateEndpoints);
             var trader = new Trader(instrument, setupService, RateEndpoints, OrderEndPoints, TradeEndpoints);
 
             while (!CancelRequested())
@@ -60,13 +63,13 @@ namespace TradeAppSample
                 {
                     foreach (var ex in aggex.Flatten().InnerExceptions)
                     {
-                        Console.Error.WriteLine(ex.Message);
+                        Console.Error.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{ex.Message}");
                         Console.Error.WriteLine(ex.StackTrace);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine(ex.Message);
+                    Console.Error.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{ex.Message}");
                     Console.Error.WriteLine(ex.StackTrace);
                 }
 

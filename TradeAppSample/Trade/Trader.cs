@@ -6,6 +6,7 @@ using TradeAppSample.Setup;
 using Rabun.Oanda.Rest.Models;
 using TradeAppSample.Common;
 using System.Linq;
+using System.Threading;
 
 namespace TradeAppSample.Trade
 {
@@ -30,6 +31,7 @@ namespace TradeAppSample.Trade
         {
             // セットアップ
             var setup = await setupService.Setup(decision.TradeType);
+            Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::セットアップ 目標値:{setup.GoalPrice}、期限:{setup.Expires.ToString("yyyy/MM/dd HH:mm:ss")}、取引数量:{setup.Units}、ストップロス:{setup.StopLoss}");
 
             var currentRate = (await rateEndPoints.GetPrices(instrument)).First();
             var currentPrice = (decimal)(decision.TradeType == TradeType.Long ? currentRate.Bid : currentRate.Ask);
@@ -48,22 +50,17 @@ namespace TradeAppSample.Trade
                 try
                 {
                     currentRate = (await rateEndPoints.GetPrices(instrument)).First();
+                    if (currentRate.Status == "halted")
+                    {
+                        Thread.Sleep(1 * 60 * 1000);
+                        continue;
+                    }
+
                     currentPrice = (decimal)(decision.TradeType == TradeType.Long ? currentRate.Bid : currentRate.Ask);
                     var trades = await tradeEndpoints.GetTrades(instrument);
                     if (trades.Any())
                     {
-                        Console.WriteLine("{0:yyyy/MM/dd HH:mm:ss}::取引終了(自動売買実行のため) 現在のレート: {1}", DateTime.Now, currentPrice);
-                        return;
-                    }
-
-                    var expired = (expires < DateTime.Now);
-                    if (expired)
-                    {
-                        // 取引が期限切れになった場合はすべてクローズする
-                        foreach (var trade in trades)
-                        {
-                            await tradeEndpoints.CloseTrade(trade.Id);
-                        }
+                        Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::取引終了(自動売買実行のため) 現在のレート: {currentPrice}");
                         return;
                     }
 
@@ -76,23 +73,43 @@ namespace TradeAppSample.Trade
                             await tradeEndpoints.UpdateTrade(trade.Id, (float)setup.StopLoss, null, null);
                         }
                     }
+                    else
+                    {
+                        var expired = (expires < DateTime.Now);
+                        if (expired)
+                        {
+                            // 取引が期限切れになった場合はすべてクローズする
+                            foreach (var trade in trades)
+                            {
+                                await tradeEndpoints.CloseTrade(trade.Id);
+                            }
+                            return;
+                        }
+                    }
                 }
                 catch (AggregateException aggex)
                 {
                     foreach (var ex in aggex.Flatten().InnerExceptions)
                     {
-                        Console.Error.WriteLine(ex.Message);
+                        Console.Error.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{ex.Message}");
                         Console.Error.WriteLine(ex.StackTrace);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine(ex.Message);
+                    Console.Error.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{ex.Message}");
                     Console.Error.WriteLine(ex.StackTrace);
                 }
             }
 
 
+        }
+
+        private DateTime getNextOpenTime()
+        {
+            var theDate = DateTime.UtcNow;
+            var d = theDate.AddDays(DayOfWeek.Monday - theDate.DayOfWeek);
+            return d <= theDate ? d.AddDays(7) : d;
         }
 
         private bool shouldExtendGoal(TradeType tradeType, decimal goalPrice, decimal currentPrice)
@@ -125,7 +142,7 @@ namespace TradeAppSample.Trade
         {
             OandaTypes.Side side = decision.TradeType == TradeType.Long ? OandaTypes.Side.buy : OandaTypes.Side.sell;
             var order = await orderEndPoints.CreateMarketOrder(instrument, setup.Units, side);
-            Console.WriteLine("{0:yyyy/MM/dd HH:mm:ss} 注文を実行: {1} にて約定", order.Time, order.Price);
+            Console.WriteLine("{0:yyyy/MM/dd HH:mm:ss}::注文を実行: {1} にて約定", order.Time, order.Price);
             var trades = await tradeEndpoints.GetTrades(instrument);
             var profit = setup.GoalPrice - (decimal)order.Price;
             foreach (var trade in trades)
