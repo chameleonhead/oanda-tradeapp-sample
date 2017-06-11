@@ -42,6 +42,7 @@ namespace TradeAppSample
             var instrument = "USD_JPY";
             var decisionService = new DecisionService(instrument, RateEndpoints);
             var setupService = new SetupService(instrument, AccountEndPoints, RateEndpoints);
+            var trader = new Trader(instrument, OrderEndPoints, TradeEndpoints);
 
             while (!CancelRequested())
             {
@@ -55,8 +56,7 @@ namespace TradeAppSample
                         var setup = setupService.Setup(decision.TradeType).Result;
 
                         // トレード開始
-                        var trader = new Trader(decision, setup);
-                        trader.Trade().Wait();
+                        trader.Trade(decision, setup).Wait();
                     }
                 }
                 catch(AggregateException aggex)
