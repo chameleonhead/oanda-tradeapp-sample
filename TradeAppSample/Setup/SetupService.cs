@@ -8,11 +8,13 @@ namespace TradeAppSample.Setup
     class SetupService
     {
         private string instrument;
+        private AccountEndPoints accountEndPoints;
         private RateEndpoints rateEndpoints;
 
-        public SetupService(string instrument, RateEndpoints rateEndpoints)
+        public SetupService(string instrument, AccountEndPoints accountEndPoints, RateEndpoints rateEndpoints)
         {
             this.instrument = instrument;
+            this.accountEndPoints = accountEndPoints;
             this.rateEndpoints = rateEndpoints;
         }
 

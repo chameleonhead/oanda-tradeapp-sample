@@ -24,13 +24,15 @@ namespace TradeAppSample
             RateEndpoints = factory.GetEndpoint<RateEndpoints>();
             TradeEndpoints = factory.GetEndpoint<TradeEndpoints>();
             TransactionEndpoints = factory.GetEndpoint<TransactionEndpoints>();
+            AccountEndPoints = new AccountEndPoints(key, AccountType.practice);
         }
 
-        public OrderEndpoints OrderEndPoints { get; internal set; }
-        public PositionEndpoints PositionEndpoints { get; internal set; }
-        public RateEndpoints RateEndpoints { get; internal set; }
-        public TradeEndpoints TradeEndpoints { get; internal set; }
-        public TransactionEndpoints TransactionEndpoints { get; internal set; }
+        public AccountEndPoints AccountEndPoints { get; private set; }
+        public OrderEndpoints OrderEndPoints { get; private set; }
+        public PositionEndpoints PositionEndpoints { get; private set; }
+        public RateEndpoints RateEndpoints { get; private set; }
+        public TradeEndpoints TradeEndpoints { get; private set; }
+        public TransactionEndpoints TransactionEndpoints { get; private set; }
 
         /// <summary>
         /// プログラム実行ループ
@@ -39,7 +41,7 @@ namespace TradeAppSample
         {
             var instrument = "USD_JPY";
             var decisionService = new DecisionService(instrument, RateEndpoints);
-            var setupService = new SetupService(instrument, RateEndpoints);
+            var setupService = new SetupService(instrument, AccountEndPoints, RateEndpoints);
 
             while (!CancelRequested())
             {

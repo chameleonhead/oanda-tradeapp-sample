@@ -67,6 +67,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Account\Models\Account.cs" />
+    <Compile Include="Account\EndPoints\AccountEndPoints.cs" />
+    <Compile Include="Account\Models\AccountDetaisl.cs" />
+    <Compile Include="Account\Models\AccountCurrency.cs" />
     <Compile Include="Common\TradeType.cs" />
     <Compile Include="Decision\DecisionResult.cs" />
     <Compile Include="Decision\DecisionService.cs" />
