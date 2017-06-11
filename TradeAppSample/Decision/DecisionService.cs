@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using TradeAppSample.Common;
+using System.Xml;
 
 namespace TradeAppSample.Decision
 {
@@ -23,20 +24,24 @@ namespace TradeAppSample.Decision
         {
             var result = new DecisionResult();
 
+            // 売買するかどうかを決定
+            var rand = new Random(DateTime.Now.Millisecond);
+            result.ShouldTrade = (rand.Next() % 10 == 0);
+            if (!result.ShouldTrade)
+                // 売買しないなら終了
+                return result;
+
+            // 現在の価格を取得
             var currentRate = (await rateEndpoints.GetPrices(instrument)).First();
             if (currentRate.Status == "HALTED")
             {
                 result.Halted = true;
                 return result;
             }
+            result.Rate = new CurrencyRate(XmlConvert.ToDateTime(currentRate.Time, XmlDateTimeSerializationMode.Local), (decimal)currentRate.Ask, (decimal)currentRate.Bid);
+            Console.WriteLine("市場価格: ASK:{1} BID:{2} ({0:yyyy/MM/dd HH:mm:ss}現在)", result.Rate.Time, result.Rate.Ask, result.Rate.Bid);
 
-            // 売買するかどうかを決定
-            var rand = new Random(DateTime.Now.Millisecond);
-            result.ShouldTrade = (rand.Next() % 10 == 0);
-            if (!result.ShouldTrade)
-                return result;
-
-            // 売買するなら買い・売りを決定
+            // 買い・売りを決定
             var rates = await rateEndpoints.GetCandles(instrument, OandaTypes.GranularityType.D, 10);
 
             // 5日間移動平均線の取得
