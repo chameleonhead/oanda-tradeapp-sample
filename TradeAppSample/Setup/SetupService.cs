@@ -2,16 +2,17 @@
 using Rabun.Oanda.Rest.Endpoints;
 using TradeAppSample.Common;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace TradeAppSample.Setup
 {
     class SetupService
     {
         private string instrument;
-        private AccountEndPoints accountEndPoints;
+        private AccountEndpoints accountEndPoints;
         private RateEndpoints rateEndpoints;
 
-        public SetupService(string instrument, AccountEndPoints accountEndPoints, RateEndpoints rateEndpoints)
+        public SetupService(string instrument, AccountEndpoints accountEndPoints, RateEndpoints rateEndpoints)
         {
             this.instrument = instrument;
             this.accountEndPoints = accountEndPoints;

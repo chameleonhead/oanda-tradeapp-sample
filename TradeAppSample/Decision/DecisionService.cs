@@ -39,7 +39,7 @@ namespace TradeAppSample.Decision
                 return result;
             }
             result.Rate = new CurrencyRate(XmlConvert.ToDateTime(currentRate.Time, XmlDateTimeSerializationMode.Local), (decimal)currentRate.Ask, (decimal)currentRate.Bid);
-            Console.WriteLine("市場価格: ASK:{1} BID:{2} ({0:yyyy/MM/dd HH:mm:ss}現在)", result.Rate.Time, result.Rate.Ask, result.Rate.Bid);
+            Console.WriteLine("{0:yyyy/MM/dd HH:mm:ss} 市場価格: ASK:{1} BID:{2} ({3:yyyy/MM/dd HH:mm:ss}現在)", DateTime.Now, result.Rate.Ask, result.Rate.Bid, result.Rate.Time);
 
             // 買い・売りを決定
             var rates = await rateEndpoints.GetCandles(instrument, OandaTypes.GranularityType.D, 10);
@@ -49,6 +49,7 @@ namespace TradeAppSample.Decision
 
             // 移動平均が上がりなら買い、下がりなら売り
             result.TradeType = emaLine5d.First() < emaLine5d.Last() ? TradeType.Long : TradeType.Short;
+            result.Price = result.TradeType == TradeType.Long ? result.Rate.Ask : result.Rate.Bid;
 
             return result;
         }

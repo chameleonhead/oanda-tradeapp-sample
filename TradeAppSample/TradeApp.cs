@@ -24,10 +24,10 @@ namespace TradeAppSample
             RateEndpoints = factory.GetEndpoint<RateEndpoints>();
             TradeEndpoints = factory.GetEndpoint<TradeEndpoints>();
             TransactionEndpoints = factory.GetEndpoint<TransactionEndpoints>();
-            AccountEndPoints = new AccountEndPoints(key, AccountType.practice);
+            AccountEndPoints = new AccountEndpoints(key, AccountType.practice);
         }
 
-        public AccountEndPoints AccountEndPoints { get; private set; }
+        public AccountEndpoints AccountEndPoints { get; private set; }
         public OrderEndpoints OrderEndPoints { get; private set; }
         public PositionEndpoints PositionEndpoints { get; private set; }
         public RateEndpoints RateEndpoints { get; private set; }
@@ -42,7 +42,7 @@ namespace TradeAppSample
             var instrument = "USD_JPY";
             var decisionService = new DecisionService(instrument, RateEndpoints);
             var setupService = new SetupService(instrument, AccountEndPoints, RateEndpoints);
-            var trader = new Trader(instrument, OrderEndPoints, TradeEndpoints);
+            var trader = new Trader(instrument, setupService, RateEndpoints, OrderEndPoints, TradeEndpoints);
 
             while (!CancelRequested())
             {
@@ -52,11 +52,8 @@ namespace TradeAppSample
                     var decision = decisionService.Decide().Result;
                     if (decision.ShouldTrade)
                     {
-                        // セットアップ
-                        var setup = setupService.Setup(decision.TradeType).Result;
-
                         // トレード開始
-                        trader.Trade(decision, setup).Wait();
+                        trader.Trade(decision).Wait();
                     }
                 }
                 catch(AggregateException aggex)

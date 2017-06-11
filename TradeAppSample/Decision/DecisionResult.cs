@@ -8,5 +8,6 @@ namespace TradeAppSample.Decision
         public TradeType TradeType { get; internal set; }
         public bool Halted { get; internal set; }
         public CurrencyRate Rate { get; internal set; }
+        public decimal Price { get; internal set; }
     }
 }

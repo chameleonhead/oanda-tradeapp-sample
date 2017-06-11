@@ -11,17 +11,17 @@ namespace Rabun.Oanda.Rest.Endpoints
     /// <summary>
     /// Account endpoints
     /// </summary>
-    public class AccountEndPoints : Endpoint
+    public class AccountEndpoints : Endpoint
     {
         private readonly string _accountsRoute = "/v1/accounts";
         private readonly string _accountDetailRoute = "/v1/accounts/:accountId";
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountEndPoints"/> class.
+        /// Initializes a new instance of the <see cref="AccountEndpoints"/> class.
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="accountType">Type of the account.</param>
-        public AccountEndPoints(string key, AccountType accountType)
+        public AccountEndpoints(string key, AccountType accountType)
             : base(key, accountType)
         {
 

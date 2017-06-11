@@ -68,7 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Account\Models\Account.cs" />
-    <Compile Include="Account\EndPoints\AccountEndPoints.cs" />
+    <Compile Include="Account\Endpoints\AccountEndpoints.cs" />
     <Compile Include="Account\Models\AccountDetaisl.cs" />
     <Compile Include="Account\Models\AccountCurrency.cs" />
     <Compile Include="Common\TradeType.cs" />
