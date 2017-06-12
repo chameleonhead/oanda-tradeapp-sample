@@ -60,6 +60,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Rabun.Oanda.Rest\Rabun.Oanda.Rest.csproj">
+      <Project>{9dd59058-0e7f-4811-8d92-32c642b60824}</Project>
+      <Name>Rabun.Oanda.Rest</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradeAppSample", "TradeAppSample\TradeAppSample.csproj", "{89A61EA9-9AE0-47AB-89BF-422B2992B8BD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rabun.Oanda.Rest", "Rabun.Oanda.Rest\Rabun.Oanda.Rest.csproj", "{9DD59058-0E7F-4811-8D92-32C642B60824}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{89A61EA9-9AE0-47AB-89BF-422B2992B8BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89A61EA9-9AE0-47AB-89BF-422B2992B8BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89A61EA9-9AE0-47AB-89BF-422B2992B8BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DD59058-0E7F-4811-8D92-32C642B60824}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DD59058-0E7F-4811-8D92-32C642B60824}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DD59058-0E7F-4811-8D92-32C642B60824}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DD59058-0E7F-4811-8D92-32C642B60824}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

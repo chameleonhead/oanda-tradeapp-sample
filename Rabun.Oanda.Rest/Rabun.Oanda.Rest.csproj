@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9DD59058-0E7F-4811-8D92-32C642B60824}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Rabun.Oanda.Rest</RootNamespace>
+    <AssemblyName>Rabun.Oanda.Rest</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Base\AccountType.cs" />
+    <Compile Include="Base\Endpoint.cs" />
+    <Compile Include="Endpoints\AccountEndpoints.cs" />
+    <Compile Include="Endpoints\OrderEndpoints.cs" />
+    <Compile Include="Endpoints\PositionEndpoints.cs" />
+    <Compile Include="Endpoints\RateEndpoints.cs" />
+    <Compile Include="Endpoints\TradeEndpoints.cs" />
+    <Compile Include="Endpoints\TransactionEndpoints.cs" />
+    <Compile Include="Factories\DefaultFactory.cs" />
+    <Compile Include="Models\Account.cs" />
+    <Compile Include="Models\AccountDetail.cs" />
+    <Compile Include="Models\Candle.cs" />
+    <Compile Include="Models\CandleBidAsk.cs" />
+    <Compile Include="Models\CandleMid.cs" />
+    <Compile Include="Models\InstrumentHistory.cs" />
+    <Compile Include="Models\InstrumentModel.cs" />
+    <Compile Include="Models\OandaTypes.cs" />
+    <Compile Include="Models\Order.cs" />
+    <Compile Include="Models\OrderClosed.cs" />
+    <Compile Include="Models\OrderCustomOpen.cs" />
+    <Compile Include="Models\OrderMarket.cs" />
+    <Compile Include="Models\OrderMarketIfTouched .cs" />
+    <Compile Include="Models\OrderMarketIfTouchedOpen.cs" />
+    <Compile Include="Models\OrderMarketOpen.cs" />
+    <Compile Include="Models\OrderOpen.cs" />
+    <Compile Include="Models\OrderOpened.cs" />
+    <Compile Include="Models\Position.cs" />
+    <Compile Include="Models\PositionClosed.cs" />
+    <Compile Include="Models\Price.cs" />
+    <Compile Include="Models\Trade.cs" />
+    <Compile Include="Models\TradeClosed.cs" />
+    <Compile Include="Models\TradeOpened.cs" />
+    <Compile Include="Models\Transaction.cs" />
+    <Compile Include="Models\TransactionDailyInterest .cs" />
+    <Compile Include="Models\TransactionDefault.cs" />
+    <Compile Include="Models\TransactionFee.cs" />
+    <Compile Include="Models\TransactionLimitOrderCreate.cs" />
+    <Compile Include="Models\TransactionMarginCallEnter.cs" />
+    <Compile Include="Models\TransactionMarginCallExit .cs" />
+    <Compile Include="Models\TransactionMarginCloseOut.cs" />
+    <Compile Include="Models\TransactionMarketIfTouchedCreate.cs" />
+    <Compile Include="Models\TransactionMarketOrderCreate.cs" />
+    <Compile Include="Models\TransactionMigrateTradeClose.cs" />
+    <Compile Include="Models\TransactionMigrateTradeOpen.cs" />
+    <Compile Include="Models\TransactionOrderCancel.cs" />
+    <Compile Include="Models\TransactionOrderFilled.cs" />
+    <Compile Include="Models\TransactionOrderUpdate.cs" />
+    <Compile Include="Models\TransactionSatMarginRate.cs" />
+    <Compile Include="Models\TransactionSimple.cs" />
+    <Compile Include="Models\TransactionStopLossField.cs" />
+    <Compile Include="Models\TransactionStopOrderCreate.cs" />
+    <Compile Include="Models\TransactionTakeProfitField.cs" />
+    <Compile Include="Models\TransactionTradeClose.cs" />
+    <Compile Include="Models\TransactionTradeUpdate.cs" />
+    <Compile Include="Models\TransactionTrailingStopField.cs" />
+    <Compile Include="Models\TransactionTransferFounds.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
