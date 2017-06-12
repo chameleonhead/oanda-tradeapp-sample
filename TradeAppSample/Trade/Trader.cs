@@ -134,7 +134,7 @@ namespace TradeAppSample.Trade
         {
             // 差が0.1%未満なら売買する
             var diff = Math.Abs(price - currentPrice);
-            return diff == 0 || (price / diff) < 0.001m;
+            return diff == 0 || (diff / price) < 0.001m;
         }
 
         private async Task<OrderOpen> CreateOrder(DecisionResult decision, SetupResult setup)

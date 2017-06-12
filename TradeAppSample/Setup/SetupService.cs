@@ -57,6 +57,12 @@ namespace TradeAppSample.Setup
             // ロスカットが１回の最大負けになるように取引数量を決定
             result.Units = (int)(lossPerTrade / maximumLossForThisTrade);
 
+            var maximumUnits = (int)((decimal)account.Balance / (currentPrice * 1.1m));
+            if (result.Units > maximumUnits)
+            {
+                result.Units = maximumUnits;
+            }
+
             // 保持期限を設定
             result.Expires = DateTime.Now.AddHours(3);
 
