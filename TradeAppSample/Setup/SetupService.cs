@@ -45,10 +45,10 @@ namespace TradeAppSample.Setup
                 range = 0.1m;
 
             // 目標値を設定
-            result.GoalPrice = currentPrice + (tradeType == TradeType.Long ? range * 0.8m : range * -0.8m);
+            result.GoalPrice = Math.Round(currentPrice + (tradeType == TradeType.Long ? range * 0.8m : range * -0.8m), 3);
 
             // ロスカットを設定
-            result.StopLoss = currentPrice + (tradeType == TradeType.Long ? range * -0.1m : range * 0.1m);
+            result.StopLoss = Math.Round(currentPrice + (tradeType == TradeType.Long ? range * -0.1m : range * 0.1m), 3);
 
             // 最大の負け金額を計算(100回負けても大丈夫なように...)
             var lossPerTrade = (decimal)account.Balance / 100m;

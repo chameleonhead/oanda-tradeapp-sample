@@ -57,7 +57,7 @@ namespace TradeAppSample.Trade
 
                     currentPrice = (decimal)(decision.TradeType == TradeType.Long ? currentRate.Bid : currentRate.Ask);
                     var trades = await tradeEndpoints.GetTrades(instrument);
-                    if (trades.Any())
+                    if (!trades.Any())
                     {
                         Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::取引終了(自動売買実行のため) 現在のレート: {currentPrice}");
                         return;
