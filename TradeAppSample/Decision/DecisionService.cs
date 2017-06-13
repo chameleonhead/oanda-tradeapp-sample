@@ -11,10 +11,10 @@ namespace TradeAppSample.Decision
 {
     class DecisionService
     {
-        private string instrument;
+        private InstrumentModel instrument;
         private RateEndpoints rateEndpoints;
 
-        public DecisionService(string instrument, RateEndpoints rateEndpoints)
+        public DecisionService(InstrumentModel instrument, RateEndpoints rateEndpoints)
         {
             this.instrument = instrument;
             this.rateEndpoints = rateEndpoints;
@@ -32,7 +32,7 @@ namespace TradeAppSample.Decision
                 return result;
 
             // 現在の価格を取得
-            var currentRate = (await rateEndpoints.GetPrices(instrument)).First();
+            var currentRate = (await rateEndpoints.GetPrices(instrument.Instrument)).First();
             if (currentRate.Status == "halted")
             {
                 result.ShouldTrade = false;
@@ -40,10 +40,10 @@ namespace TradeAppSample.Decision
                 return result;
             }
             result.Rate = new CurrencyRate(XmlConvert.ToDateTime(currentRate.Time, XmlDateTimeSerializationMode.Local), (decimal)currentRate.Ask, (decimal)currentRate.Bid);
-            Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::市場価格: ASK:{result.Rate.Ask} BID:{result.Rate.Bid} ({result.Rate.Time.ToString("yyyy/MM/dd HH:mm:ss")}現在)");
+            Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{instrument.DisplayName} 市場価格: ASK:{result.Rate.Ask} BID:{result.Rate.Bid} ({result.Rate.Time.ToString("yyyy/MM/dd HH:mm:ss")}現在)");
 
             // 買い・売りを決定
-            var rates = await rateEndpoints.GetCandles(instrument, OandaTypes.GranularityType.D, 10);
+            var rates = await rateEndpoints.GetCandles(instrument.Instrument, OandaTypes.GranularityType.H1, 10);
 
             // 5日間移動平均線の取得
             var emaLine5d = calculateEmaLine(rates.Candles.Select(c => (decimal)c.CloseAsk).ToArray(), 5);

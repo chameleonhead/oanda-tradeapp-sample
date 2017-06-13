@@ -11,13 +11,13 @@ namespace TradeAppSample.Trade
 {
     class Trader
     {
-        private string instrument;
+        private InstrumentModel instrument;
         private SetupService setupService;
         private RateEndpoints rateEndPoints;
         private TradeEndpoints tradeEndpoints;
         private OrderEndpoints orderEndPoints;
 
-        public Trader(string instrument, SetupService setupService, RateEndpoints rateEndPoints, OrderEndpoints orderEndPoints, TradeEndpoints tradeEndpoints)
+        public Trader(InstrumentModel instrument, SetupService setupService, RateEndpoints rateEndPoints, OrderEndpoints orderEndPoints, TradeEndpoints tradeEndpoints)
         {
             this.instrument = instrument;
             this.setupService = setupService;
@@ -30,9 +30,9 @@ namespace TradeAppSample.Trade
         {
             // セットアップ
             var setup = await setupService.Setup(decision.TradeType);
-            Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::セットアップ 目標値:{setup.GoalPrice}、期限:{setup.Expires.ToString("yyyy/MM/dd HH:mm:ss")}、取引数量:{setup.Units}、ストップロス:{setup.StopLoss}");
+            Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{instrument.DisplayName} セットアップ 目標値:{setup.GoalPrice}、期限:{setup.Expires.ToString("yyyy/MM/dd HH:mm:ss")}、取引数量:{setup.Units}、ストップロス:{setup.StopLoss}");
 
-            var currentRate = (await rateEndPoints.GetPrices(instrument)).First();
+            var currentRate = (await rateEndPoints.GetPrices(instrument.Instrument)).First();
             var currentPrice = (decimal)(decision.TradeType == TradeType.Long ? currentRate.Bid : currentRate.Ask);
             if (!canMakeOrder(decision.Price, currentPrice))
             {
@@ -48,7 +48,7 @@ namespace TradeAppSample.Trade
             {
                 try
                 {
-                    currentRate = (await rateEndPoints.GetPrices(instrument)).First();
+                    currentRate = (await rateEndPoints.GetPrices(instrument.Instrument)).First();
                     if (currentRate.Status == "halted")
                     {
                         await Task.Delay(1 * 60 * 1000);
@@ -56,21 +56,25 @@ namespace TradeAppSample.Trade
                     }
 
                     currentPrice = (decimal)(decision.TradeType == TradeType.Long ? currentRate.Bid : currentRate.Ask);
-                    var trades = await tradeEndpoints.GetTrades(instrument);
+                    var trades = await tradeEndpoints.GetTrades(instrument.Instrument);
                     if (!trades.Any())
                     {
-                        Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::取引終了(自動売買実行のため) 現在のレート: {currentPrice}");
+                        Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{instrument.DisplayName} 取引終了(自動売買実行のため) 現在のレート: {currentPrice}");
                         return;
                     }
 
                     if (shouldExtendGoal(decision.TradeType, goalPrice, currentPrice))
                     {
                         setup = await setupService.Setup(decision.TradeType);
+                        basePrice = currentPrice;
+                        goalPrice = setup.GoalPrice;
+                        expires = setup.Expires;
                         foreach (var trade in trades)
                         {
                             // 全注文に対してストップロスを設定
                             await tradeEndpoints.UpdateTrade(trade.Id, (float)setup.StopLoss, null, null);
                         }
+                        Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{instrument.DisplayName} 目標値更新 現在価格: {currentPrice}、新しい目標値:{setup.GoalPrice}、期限:{setup.Expires.ToString("yyyy/MM/dd HH:mm:ss")}、ストップロス:{setup.StopLoss}");
                     }
                     else
                     {
@@ -140,9 +144,9 @@ namespace TradeAppSample.Trade
         private async Task<OrderOpen> CreateOrder(DecisionResult decision, SetupResult setup)
         {
             OandaTypes.Side side = decision.TradeType == TradeType.Long ? OandaTypes.Side.buy : OandaTypes.Side.sell;
-            var order = await orderEndPoints.CreateMarketOrder(instrument, setup.Units, side);
-            Console.WriteLine("{0:yyyy/MM/dd HH:mm:ss}::注文を実行: {1} にて約定", order.Time, order.Price);
-            var trades = await tradeEndpoints.GetTrades(instrument);
+            var order = await orderEndPoints.CreateMarketOrder(instrument.Instrument, setup.Units, side);
+            Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{instrument.DisplayName} 注文を実行: {order.Price} にて約定 ({order.Time.ToString("yyyy/MM/dd HH:mm:ss")})");
+            var trades = await tradeEndpoints.GetTrades(instrument.Instrument);
             var profit = setup.GoalPrice - (decimal)order.Price;
             foreach (var trade in trades)
             {

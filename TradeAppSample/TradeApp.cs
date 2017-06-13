@@ -42,24 +42,26 @@ namespace TradeAppSample
         /// </summary>
         public void Run()
         {
-            var instrument = "USD_JPY";
-            var decisionService = new DecisionService(instrument, RateEndpoints);
-            var setupService = new SetupService(instrument, accountId, AccountEndpoints, RateEndpoints);
-            var trader = new Trader(instrument, setupService, RateEndpoints, OrderEndPoints, TradeEndpoints);
-
+            var instruments = RateEndpoints.GetInstruments("AUD_JPY,CAD_JPY,CHF_JPY,EUR_JPY,GBP_JPY,HKD_JPY,NZD_JPY,SGD_JPY,TRY_JPY,USD_JPY,ZAR_JPY").Result;
             while (!CancelRequested())
             {
                 try
                 {
+                    var rand = new Random(DateTime.Now.Millisecond);
+                    var instrument = instruments[rand.Next() % instruments.Count];
                     // 売買するか決定
+                    var decisionService = new DecisionService(instrument, RateEndpoints);
                     var decision = decisionService.Decide().Result;
                     if (decision.ShouldTrade)
                     {
+                        var setupService = new SetupService(instrument, accountId, AccountEndpoints, RateEndpoints);
+                        var trader = new Trader(instrument, setupService, RateEndpoints, OrderEndPoints, TradeEndpoints);
+
                         // トレード開始
                         trader.Trade(decision).Wait();
                     }
                 }
-                catch(AggregateException aggex)
+                catch (AggregateException aggex)
                 {
                     foreach (var ex in aggex.Flatten().InnerExceptions)
                     {

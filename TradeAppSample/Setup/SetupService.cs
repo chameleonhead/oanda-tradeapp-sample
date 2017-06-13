@@ -9,12 +9,12 @@ namespace TradeAppSample.Setup
 {
     class SetupService
     {
-        private string instrument;
+        private InstrumentModel instrument;
         private int accountId;
         private AccountEndpoints accountEndpoints;
         private RateEndpoints rateEndpoints;
 
-        public SetupService(string instrument, int accountId, AccountEndpoints accountEndpoints, RateEndpoints rateEndpoints)
+        public SetupService(InstrumentModel instrument, int accountId, AccountEndpoints accountEndpoints, RateEndpoints rateEndpoints)
         {
             this.instrument = instrument;
             this.accountId = accountId;
@@ -28,11 +28,11 @@ namespace TradeAppSample.Setup
 
             var account = await accountEndpoints.GetAccountDetails(accountId);
 
-            var currentRate = (await rateEndpoints.GetPrices(instrument)).First();
+            var currentRate = (await rateEndpoints.GetPrices(instrument.Instrument)).First();
             var currentPrice = (decimal)(tradeType == TradeType.Long ? currentRate.Ask : currentRate.Bid);
 
             // 直近一日の変動幅を取得
-            var rate = (await rateEndpoints.GetCandles(instrument, OandaTypes.GranularityType.D, 1)).Candles.First();
+            var rate = (await rateEndpoints.GetCandles(instrument.Instrument, OandaTypes.GranularityType.D, 1)).Candles.First();
 
             // 取引レンジの上限を取得
             var rangeMax = (decimal)(tradeType == TradeType.Long ? rate.HighAsk : rate.HighBid);
@@ -45,10 +45,10 @@ namespace TradeAppSample.Setup
                 range = 0.1m;
 
             // 目標値を設定
-            result.GoalPrice = Math.Round(currentPrice + (tradeType == TradeType.Long ? range * 0.8m : range * -0.8m), 3);
+            result.GoalPrice = alignToPip(currentPrice + (tradeType == TradeType.Long ? range * 0.4m : range * -0.4m), (decimal)instrument.Pip);
 
             // ロスカットを設定
-            result.StopLoss = Math.Round(currentPrice + (tradeType == TradeType.Long ? range * -0.1m : range * 0.1m), 3);
+            result.StopLoss = alignToPip(currentPrice + (tradeType == TradeType.Long ? range * -0.2m : range * 0.2m), (decimal)instrument.Pip);
 
             // 最大の負け金額を計算(100回負けても大丈夫なように...)
             var lossPerTrade = (decimal)account.Balance / 100m;
@@ -57,16 +57,22 @@ namespace TradeAppSample.Setup
             // ロスカットが１回の最大負けになるように取引数量を決定
             result.Units = (int)(lossPerTrade / maximumLossForThisTrade);
 
-            var maximumUnits = (int)((decimal)account.Balance / (currentPrice * 1.1m));
+            // レバレッジを10バイトして計算
+            var maximumUnits = (int)((decimal)account.Balance / (currentPrice * 1.1m)) * 10;
             if (result.Units > maximumUnits)
             {
                 result.Units = maximumUnits;
             }
 
             // 保持期限を設定
-            result.Expires = DateTime.Now.AddHours(3);
+            result.Expires = DateTime.Now.AddHours(4);
 
             return result;
+        }
+
+        private decimal alignToPip(decimal value, decimal pip)
+        {
+            return Math.Round(value / pip, 0) * pip;
         }
     }
 }
