@@ -55,7 +55,9 @@
     <Compile Include="Setup\SetupResult.cs" />
     <Compile Include="Setup\SetupService.cs" />
     <Compile Include="TradeApp.cs" />
+    <Compile Include="Trade\NextGoal.cs" />
     <Compile Include="Trade\Trader.cs" />
+    <Compile Include="Trade\TradeResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

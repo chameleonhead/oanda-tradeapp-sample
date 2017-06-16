@@ -43,13 +43,13 @@ namespace TradeAppSample.Decision
             Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{instrument.DisplayName} 市場価格: ASK:{result.Rate.Ask} BID:{result.Rate.Bid} ({result.Rate.Time.ToString("yyyy/MM/dd HH:mm:ss")}現在)");
 
             // 買い・売りを決定
-            var rates = await rateEndpoints.GetCandles(instrument.Instrument, OandaTypes.GranularityType.H1, 10);
+            var rates = await rateEndpoints.GetCandles(instrument.Instrument, OandaTypes.GranularityType.H1, 8);
 
             // 5日間移動平均線の取得
-            var emaLine5d = calculateEmaLine(rates.Candles.Select(c => (decimal)c.CloseAsk).ToArray(), 5);
+            var emaLine6h = calculateEmaLine(rates.Candles.Select(c => (decimal)c.CloseAsk).ToArray(), 6);
 
             // 移動平均が上がりなら買い、下がりなら売り
-            result.TradeType = emaLine5d.First() < emaLine5d.Last() ? TradeType.Long : TradeType.Short;
+            result.TradeType = emaLine6h.First() < emaLine6h.Last() ? TradeType.Long : TradeType.Short;
             result.Price = result.TradeType == TradeType.Long ? result.Rate.Ask : result.Rate.Bid;
 
             return result;

@@ -26,21 +26,34 @@ namespace TradeAppSample.Trade
             this.tradeEndpoints = tradeEndpoints;
         }
 
-        public async Task Trade(DecisionResult decision)
+        public async Task<TradeResult> Trade(DecisionResult decision)
         {
             // セットアップ
             var setup = await setupService.Setup(decision.TradeType);
             Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{instrument.DisplayName} セットアップ 目標値:{setup.GoalPrice}、期限:{setup.Expires.ToString("yyyy/MM/dd HH:mm:ss")}、取引数量:{setup.Units}、ストップロス:{setup.StopLoss}");
+
+            // 激しい相場ではないことを確認するため、1秒待ってから処理継続
+            await Task.Delay(1000);
 
             var currentRate = (await rateEndPoints.GetPrices(instrument.Instrument)).First();
             var currentPrice = (decimal)(decision.TradeType == TradeType.Long ? currentRate.Bid : currentRate.Ask);
             if (!canMakeOrder(decision.Price, currentPrice))
             {
                 // オーダーの変動が想定以上の場合はオーダーしない
-                return;
+                return null;
             }
 
             var openOrder = await CreateOrder(decision, setup);
+            var tradeResult = new TradeResult();
+            tradeResult.Instrument = instrument.Instrument;
+            tradeResult.InstrumentName = instrument.DisplayName;
+            tradeResult.TradeType = decision.TradeType;
+            tradeResult.DecisionPrice = decision.Price;
+            tradeResult.StartedPrice = (decimal)openOrder.Price;
+            tradeResult.DealStartedAt = openOrder.Time;
+            tradeResult.FirstGoalPrice = setup.GoalPrice;
+            tradeResult.FirstStopLoss = setup.StopLoss;
+
             var basePrice = decision.Price;
             var goalPrice = setup.GoalPrice;
             var expires = setup.Expires;
@@ -59,22 +72,25 @@ namespace TradeAppSample.Trade
                     var trades = await tradeEndpoints.GetTrades(instrument.Instrument);
                     if (!trades.Any())
                     {
+                        tradeResult.FinishedPrice = currentPrice;
+                        tradeResult.DealFinishedAt = DateTime.Now;
                         Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{instrument.DisplayName} 取引終了(自動売買実行のため) 現在のレート: {currentPrice}");
-                        return;
+                        return tradeResult;
                     }
 
-                    if (shouldExtendGoal(decision.TradeType, goalPrice, currentPrice))
+                    if (currentPriceReachedGoal(decision.TradeType, goalPrice, currentPrice))
                     {
-                        setup = await setupService.Setup(decision.TradeType);
-                        basePrice = currentPrice;
-                        goalPrice = setup.GoalPrice;
-                        expires = setup.Expires;
+                        var profitToNextGoalPrice = goalPrice - basePrice;
+                        basePrice = goalPrice;
+                        goalPrice = goalPrice + profitToNextGoalPrice;
+                        expires = expires.AddHours(4);
+                        tradeResult.AddGoal(goalPrice, basePrice, expires);
                         foreach (var trade in trades)
                         {
                             // 全注文に対してストップロスを設定
-                            await tradeEndpoints.UpdateTrade(trade.Id, (float)setup.StopLoss, null, null);
+                            await tradeEndpoints.UpdateTrade(trade.Id, (float)basePrice, null, null);
                         }
-                        Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{instrument.DisplayName} 目標値更新 現在価格: {currentPrice}、新しい目標値:{setup.GoalPrice}、期限:{setup.Expires.ToString("yyyy/MM/dd HH:mm:ss")}、ストップロス:{setup.StopLoss}");
+                        Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{instrument.DisplayName} 目標値更新 現在価格: {currentPrice}、新しい目標値:{goalPrice}、期限:{expires.ToString("yyyy/MM/dd HH:mm:ss")}、ストップロス:{basePrice}");
                     }
                     else
                     {
@@ -86,7 +102,10 @@ namespace TradeAppSample.Trade
                             {
                                 await tradeEndpoints.CloseTrade(trade.Id);
                             }
-                            return;
+                            tradeResult.FinishedPrice = currentPrice;
+                            tradeResult.DealFinishedAt = DateTime.Now;
+                            Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{instrument.DisplayName} 取引終了(期限までに目標値を未達成のため) 現在のレート: {currentPrice}");
+                            return tradeResult;
                         }
                     }
                 }
@@ -108,14 +127,7 @@ namespace TradeAppSample.Trade
 
         }
 
-        private DateTime getNextOpenTime()
-        {
-            var theDate = DateTime.UtcNow;
-            var d = theDate.AddDays(DayOfWeek.Monday - theDate.DayOfWeek);
-            return d <= theDate ? d.AddDays(7) : d;
-        }
-
-        private bool shouldExtendGoal(TradeType tradeType, decimal goalPrice, decimal currentPrice)
+        private bool currentPriceReachedGoal(TradeType tradeType, decimal goalPrice, decimal currentPrice)
         {
             if (currentPrice == goalPrice)
             {
@@ -136,9 +148,9 @@ namespace TradeAppSample.Trade
 
         private bool canMakeOrder(decimal price, decimal currentPrice)
         {
-            // 差が0.1%未満なら売買する
+            // 差が20pips未満なら売買する
             var diff = Math.Abs(price - currentPrice);
-            return diff == 0 || (diff / price) < 0.001m;
+            return diff == 0 || (diff / price) < ((decimal)instrument.Pip * 20m);
         }
 
         private async Task<OrderOpen> CreateOrder(DecisionResult decision, SetupResult setup)

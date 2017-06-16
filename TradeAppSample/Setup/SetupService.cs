@@ -31,12 +31,12 @@ namespace TradeAppSample.Setup
             var currentRate = (await rateEndpoints.GetPrices(instrument.Instrument)).First();
             var currentPrice = (decimal)(tradeType == TradeType.Long ? currentRate.Ask : currentRate.Bid);
 
-            // 直近一日の変動幅を取得
-            var rate = (await rateEndpoints.GetCandles(instrument.Instrument, OandaTypes.GranularityType.D, 1)).Candles.First();
+            // 最近最大1日間の変動幅を取得
+            var candle = await rateEndpoints.GetCandles(instrument.Instrument, OandaTypes.GranularityType.H12, DateTime.Now.AddDays(-1.0), DateTime.Now);
 
             // 取引レンジの上限を取得
-            var rangeMax = (decimal)(tradeType == TradeType.Long ? rate.HighAsk : rate.HighBid);
-            var rangeMin = (decimal)(tradeType == TradeType.Long ? rate.LowAsk : rate.LowBid);
+            var rangeMax = (decimal)(tradeType == TradeType.Long ? candle.Candles.Max(r => r.HighAsk) : candle.Candles.Max(r => r.HighBid));
+            var rangeMin = (decimal)(tradeType == TradeType.Long ? candle.Candles.Min(r => r.LowAsk) : candle.Candles.Min(r => r.LowBid));
 
             var range = Math.Abs(rangeMax - rangeMin);
 
@@ -45,10 +45,10 @@ namespace TradeAppSample.Setup
                 range = 0.1m;
 
             // 目標値を設定
-            result.GoalPrice = alignToPip(currentPrice + (tradeType == TradeType.Long ? range * 0.4m : range * -0.4m), (decimal)instrument.Pip);
+            result.GoalPrice = alignToPrecision(currentPrice + (tradeType == TradeType.Long ? range * 0.4m : range * -0.4m), (decimal)instrument.Precision);
 
             // ロスカットを設定
-            result.StopLoss = alignToPip(currentPrice + (tradeType == TradeType.Long ? range * -0.2m : range * 0.2m), (decimal)instrument.Pip);
+            result.StopLoss = alignToPrecision(currentPrice + (tradeType == TradeType.Long ? range * -0.2m : range * 0.2m), (decimal)instrument.Precision);
 
             // 最大の負け金額を計算(100回負けても大丈夫なように...)
             var lossPerTrade = (decimal)account.Balance / 100m;
@@ -58,7 +58,7 @@ namespace TradeAppSample.Setup
             result.Units = (int)(lossPerTrade / maximumLossForThisTrade);
 
             // レバレッジを10バイトして計算
-            var maximumUnits = (int)((decimal)account.Balance / (currentPrice * 1.1m)) * 10;
+            var maximumUnits = (int)((decimal)account.MarginAvail / (currentPrice  * 1.1m * (decimal)instrument.MarginRate));
             if (result.Units > maximumUnits)
             {
                 result.Units = maximumUnits;
@@ -70,9 +70,9 @@ namespace TradeAppSample.Setup
             return result;
         }
 
-        private decimal alignToPip(decimal value, decimal pip)
+        private decimal alignToPrecision(decimal value, decimal precision)
         {
-            return Math.Round(value / pip, 0) * pip;
+            return Math.Round(value / precision, 0) * precision;
         }
     }
 }

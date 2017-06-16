@@ -11,6 +11,8 @@ using TradeAppSample.Decision;
 using TradeAppSample.Setup;
 using TradeAppSample.Trade;
 using System.Threading;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace TradeAppSample
 {
@@ -42,11 +44,12 @@ namespace TradeAppSample
         /// </summary>
         public void Run()
         {
-            var instruments = RateEndpoints.GetInstruments("AUD_JPY,CAD_JPY,CHF_JPY,EUR_JPY,GBP_JPY,HKD_JPY,NZD_JPY,SGD_JPY,TRY_JPY,USD_JPY,ZAR_JPY").Result;
-            while (!CancelRequested())
+            var instruments = RateEndpoints.GetInstruments("instrument,displayName,pip,maxTradeUnits,precision,maxTrailingStop,minTrailingStop,marginRate,halted", "AUD_JPY,CAD_JPY,CHF_JPY,EUR_JPY,GBP_JPY,HKD_JPY,NZD_JPY,SGD_JPY,TRY_JPY,USD_JPY,ZAR_JPY").Result;
+            while (!cancelRequested())
             {
                 try
                 {
+                    // 取引する通貨を決定
                     var rand = new Random(DateTime.Now.Millisecond);
                     var instrument = instruments[rand.Next() % instruments.Count];
                     // 売買するか決定
@@ -58,7 +61,9 @@ namespace TradeAppSample
                         var trader = new Trader(instrument, setupService, RateEndpoints, OrderEndPoints, TradeEndpoints);
 
                         // トレード開始
-                        trader.Trade(decision).Wait();
+                        var tradeResult = trader.Trade(decision).Result;
+                        printTradeResult(tradeResult);
+                        saveTrade(tradeResult);
                     }
                 }
                 catch (AggregateException aggex)
@@ -80,7 +85,29 @@ namespace TradeAppSample
             }
         }
 
-        private bool CancelRequested()
+        private void printTradeResult(TradeResult tradeResult)
+        {
+            Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{tradeResult.InstrumentName}");
+            Console.WriteLine($@"
+    価格:{tradeResult.StartedPrice} -> {tradeResult.FinishedPrice} (取引決定時: {tradeResult.DecisionPrice})
+        ({tradeResult.DealStartedAt.ToString("MM/dd HH:mm:ss")} -> {tradeResult.DealFinishedAt.ToString("MM/dd HH:mm:ss")})
+
+    [初回の状態]
+        目標値    :{tradeResult.FirstGoalPrice}
+        ロスカット:{tradeResult.FirstStopLoss}
+");
+        }
+
+        private void saveTrade(TradeResult tradeResult)
+        {
+            using (var stream = new FileStream("Trade_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xml", FileMode.Create, FileAccess.Write))
+            {
+                var serializer = new XmlSerializer(typeof(TradeResult));
+                serializer.Serialize(stream, tradeResult);
+            }
+        }
+
+        private bool cancelRequested()
         {
             // TODO ファイルを監視したりしてキャンセルできるようにする
             return false;
