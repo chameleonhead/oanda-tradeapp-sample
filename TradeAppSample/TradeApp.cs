@@ -44,6 +44,11 @@ namespace TradeAppSample
         /// </summary>
         public void Run()
         {
+            if (File.Exists("shutdown"))
+            {
+                File.Delete("shutdown");
+            }
+
             var instruments = RateEndpoints.GetInstruments("instrument,displayName,pip,maxTradeUnits,precision,maxTrailingStop,minTrailingStop,marginRate,halted", "AUD_JPY,CAD_JPY,CHF_JPY,EUR_JPY,GBP_JPY,HKD_JPY,NZD_JPY,SGD_JPY,TRY_JPY,USD_JPY,ZAR_JPY").Result;
             while (!cancelRequested())
             {
@@ -109,8 +114,7 @@ namespace TradeAppSample
 
         private bool cancelRequested()
         {
-            // TODO ファイルを監視したりしてキャンセルできるようにする
-            return false;
+            return File.Exists("shutdown");
         }
     }
 }

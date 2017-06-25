@@ -136,7 +136,7 @@ namespace TradeAppSample.Trade
                 return new NextGoal()
                 {
                     GoalPrice = currentPrice + diff,
-                    StopLoss = currentPrice - diff * 0.5m,
+                    StopLoss = currentPrice - round(diff * 0.5m),
                     Expires = DateTime.Now.AddHours(4)
                 };
             }
@@ -146,10 +146,15 @@ namespace TradeAppSample.Trade
                 return new NextGoal()
                 {
                     GoalPrice = currentPrice - diff,
-                    StopLoss = currentPrice + diff * 0.5m,
+                    StopLoss = currentPrice + round(diff * 0.5m),
                     Expires = DateTime.Now.AddHours(4)
                 };
             }
+        }
+
+        private decimal round(decimal value)
+        {
+            return Math.Round(value / (decimal)instrument.Precision, 0) * (decimal)instrument.Precision;
         }
 
         private bool shouldChangeGoal(TradeType tradeType, decimal basePrice, decimal goalPrice, decimal currentPrice)
