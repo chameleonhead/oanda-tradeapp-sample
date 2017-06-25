@@ -56,6 +56,7 @@ namespace TradeAppSample.Trade
 
             var basePrice = decision.Price;
             var goalPrice = setup.GoalPrice;
+            var stoplossPrice = setup.StopLoss;
             var expires = setup.Expires;
             while (true)
             {
@@ -78,12 +79,13 @@ namespace TradeAppSample.Trade
                         return tradeResult;
                     }
 
-                    if (currentPriceReachedGoal(decision.TradeType, goalPrice, currentPrice))
+                    if (shouldChangeGoal(decision.TradeType, basePrice, goalPrice, currentPrice))
                     {
-                        var profitToNextGoalPrice = goalPrice - basePrice;
-                        basePrice = goalPrice;
-                        goalPrice = goalPrice + profitToNextGoalPrice;
-                        expires = expires.AddHours(4);
+                        var nextGoal = calculateNextGoal(decision.TradeType, basePrice, goalPrice, currentPrice);
+                        basePrice = currentPrice;
+                        stoplossPrice = nextGoal.StopLoss;
+                        goalPrice = nextGoal.GoalPrice;
+                        expires = nextGoal.Expires;
                         tradeResult.AddGoal(goalPrice, basePrice, expires);
                         foreach (var trade in trades)
                         {
@@ -123,26 +125,45 @@ namespace TradeAppSample.Trade
                     Console.Error.WriteLine(ex.StackTrace);
                 }
             }
-
-
         }
 
-        private bool currentPriceReachedGoal(TradeType tradeType, decimal goalPrice, decimal currentPrice)
+        private NextGoal calculateNextGoal(TradeType tradeType, decimal basePrice, decimal goalPrice, decimal currentPrice)
         {
-            if (currentPrice == goalPrice)
-            {
-                return true;
-            }
-
+            var diff = Math.Abs(goalPrice - basePrice);
             if (tradeType == TradeType.Long)
             {
-                // 買いの場合は目標価格より上がった場合
-                return currentPrice > goalPrice;
+                // 買いの場合は目標利益の50%より上がった場合
+                return new NextGoal()
+                {
+                    GoalPrice = currentPrice + diff,
+                    StopLoss = currentPrice - diff * 0.5m,
+                    Expires = DateTime.Now.AddHours(4)
+                };
             }
             else
             {
-                // 売りの場合は目標価格より下がった場合
-                return currentPrice < goalPrice;
+                // 売りの場合は目標利益の50%より下がった場合
+                return new NextGoal()
+                {
+                    GoalPrice = currentPrice - diff,
+                    StopLoss = currentPrice + diff * 0.5m,
+                    Expires = DateTime.Now.AddHours(4)
+                };
+            }
+        }
+
+        private bool shouldChangeGoal(TradeType tradeType, decimal basePrice, decimal goalPrice, decimal currentPrice)
+        {
+            var diff = Math.Abs(goalPrice - basePrice);
+            if (tradeType == TradeType.Long)
+            {
+                // 買いの場合は目標利益の50%より上がった場合
+                return currentPrice > (basePrice + diff * 0.5m);
+            }
+            else
+            {
+                // 売りの場合は目標利益の50%より下がった場合
+                return currentPrice < (basePrice - diff * 0.5m);
             }
         }
 
