@@ -32,7 +32,7 @@ namespace TradeAppSample.Setup
             var currentPrice = (decimal)(tradeType == TradeType.Long ? currentRate.Ask : currentRate.Bid);
 
             // 最近最大1日間の変動幅を取得
-            var candle = await rateEndpoints.GetCandles(instrument.Instrument, OandaTypes.GranularityType.H12, DateTime.Now.AddDays(-1.0), DateTime.Now);
+            var candle = await rateEndpoints.GetCandles(instrument.Instrument, OandaTypes.GranularityType.H1, DateTime.Now.AddDays(-1.0), DateTime.Now);
 
             // 取引レンジの上限を取得
             var rangeMax = (decimal)(tradeType == TradeType.Long ? candle.Candles.Max(r => r.HighAsk) : candle.Candles.Max(r => r.HighBid));
@@ -45,7 +45,7 @@ namespace TradeAppSample.Setup
                 range = 0.1m;
 
             // 目標値を設定
-            result.GoalPrice = alignToPrecision(currentPrice + (tradeType == TradeType.Long ? range * 0.4m : range * -0.4m), (decimal)instrument.Precision);
+            result.GoalPrice = alignToPrecision(currentPrice + (tradeType == TradeType.Long ? range * 0.2m : range * -0.2m), (decimal)instrument.Precision);
 
             // ロスカットを設定
             result.StopLoss = alignToPrecision(currentPrice + (tradeType == TradeType.Long ? range * -0.2m : range * 0.2m), (decimal)instrument.Precision);
@@ -57,7 +57,7 @@ namespace TradeAppSample.Setup
             // ロスカットが１回の最大負けになるように取引数量を決定
             result.Units = (int)(lossPerTrade / maximumLossForThisTrade);
 
-            // レバレッジを10バイトして計算
+            // レバレッジを10倍として計算
             var maximumUnits = (int)((decimal)account.MarginAvail / (currentPrice  * 1.1m * (decimal)instrument.MarginRate));
             if (result.Units > maximumUnits)
             {
