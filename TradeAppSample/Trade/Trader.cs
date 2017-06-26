@@ -36,7 +36,7 @@ namespace TradeAppSample.Trade
             await Task.Delay(1000);
 
             var currentRate = (await rateEndPoints.GetPrices(instrument.Instrument)).First();
-            var currentPrice = (decimal)(decision.TradeType == TradeType.Long ? currentRate.Bid : currentRate.Ask);
+            var currentPrice = (decimal)(decision.TradeType == TradeType.Long ? currentRate.Ask : currentRate.Bid);
             if (!canMakeOrder(decision.Price, currentPrice))
             {
                 // オーダーの変動が想定以上の場合はオーダーしない
@@ -69,7 +69,7 @@ namespace TradeAppSample.Trade
                         continue;
                     }
 
-                    currentPrice = (decimal)(decision.TradeType == TradeType.Long ? currentRate.Bid : currentRate.Ask);
+                    currentPrice = (decimal)(decision.TradeType == TradeType.Long ? currentRate.Ask : currentRate.Bid);
                     var trades = await tradeEndpoints.GetTrades(instrument.Instrument);
                     if (!trades.Any())
                     {
@@ -90,7 +90,7 @@ namespace TradeAppSample.Trade
                         foreach (var trade in trades)
                         {
                             // 全注文に対してストップロスを設定
-                            await tradeEndpoints.UpdateTrade(trade.Id, (float)basePrice, null, null);
+                            await tradeEndpoints.UpdateTrade(trade.Id, (float)stoplossPrice, null, null);
                         }
                         Console.WriteLine($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}::{instrument.DisplayName} 目標値更新 現在価格: {currentPrice}、新しい目標値:{goalPrice}、期限:{expires.ToString("yyyy/MM/dd HH:mm:ss")}、ストップロス:{basePrice}");
                     }
