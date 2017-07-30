@@ -3,19 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradeAppSample", "TradeAppSample\TradeAppSample.csproj", "{3F84B479-14BD-41FB-95A4-F39BDD435519}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{09190524-A050-48EA-842E-E68F60E8FC76}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{6C621505-1407-4599-937E-C38727E7D73F}"
 EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3F84B479-14BD-41FB-95A4-F39BDD435519}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3F84B479-14BD-41FB-95A4-F39BDD435519}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3F84B479-14BD-41FB-95A4-F39BDD435519}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3F84B479-14BD-41FB-95A4-F39BDD435519}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
