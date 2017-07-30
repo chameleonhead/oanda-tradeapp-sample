@@ -1,14 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using System;
 
 namespace TradeAppSample.Test
 {
     [TestClass]
-    public class SwingLowHighPointCalculatorTest
+    public class SwingLowHighContextFactoryTest
     {
         [TestMethod]
-        public void ShouldRecognizeSwingHighPointAndSwingLowPointFromPassedLine()
+        public void ShouldRecognizeSwingHighAndSwingLowFromPassedCandles()
         {
             var candles = new ForexCandle[] {
                 ForexCandleUtils.Create(100, 110, 90, 101),
@@ -17,10 +15,10 @@ namespace TradeAppSample.Test
                 ForexCandleUtils.Create(110, 120, 100, 115),
                 ForexCandleUtils.Create(115, 117, 113, 110),
             };
-            var calculator = new SwingLowHighPointCalculator();
-            var result = calculator.Calculate(candles);
-            Assert.AreEqual(120, result.High.Bid);
-            Assert.AreEqual(89, result.Low.Bid);
+            var factory = new SwingLowHighContextFactory();
+            var context = factory.Create(candles);
+            Assert.AreEqual(120, context.SwingHigh.Bid);
+            Assert.AreEqual(89, context.SwingLow.Bid);
         }
     }
 }

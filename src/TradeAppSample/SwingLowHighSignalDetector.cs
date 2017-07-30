@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TradeAppSample
 {
-    public class SwingLowHighDetector
+    public class SwingLowHighSignalDetector
     {
         public void DetectSignal(SwingLowHighContext context, Tick currentTick)
         {

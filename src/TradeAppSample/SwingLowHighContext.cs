@@ -2,13 +2,13 @@
 {
     public class SwingLowHighContext
     {
-        private int v1;
-        private int v2;
-
-        public SwingLowHighContext(int v1, int v2)
+        public SwingLowHighContext(ForexPrice swingHigh, ForexPrice swingLow)
         {
-            this.v1 = v1;
-            this.v2 = v2;
+            SwingHigh = swingHigh;
+            SwingLow = swingLow;
         }
+
+        public ForexPrice SwingHigh { get; }
+        public ForexPrice SwingLow { get; }
     }
 }

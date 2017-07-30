@@ -36,5 +36,38 @@ namespace TradeAppSample
                 return -1;
             }
         }
+
+        public override int GetHashCode()
+        {
+            return (Ask + Bid).GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            if (!(obj is ForexPrice)) return false;
+            var price = obj as ForexPrice;
+            return Ask == price.Ask && Bid == price.Bid;
+        }
+
+        public static bool operator ==(ForexPrice p1, ForexPrice p2)
+        {
+            return p1.Equals(p2);
+        }
+
+        public static bool operator !=(ForexPrice p1, ForexPrice p2)
+        {
+            return !p1.Equals(p2);
+        }
+
+        public static bool operator <(ForexPrice p1, ForexPrice p2)
+        {
+            return p1.CompareTo(p2) < 0;
+        }
+
+        public static bool operator >(ForexPrice p1, ForexPrice p2)
+        {
+            return p1.CompareTo(p2) > 0;
+        }
     }
 }
