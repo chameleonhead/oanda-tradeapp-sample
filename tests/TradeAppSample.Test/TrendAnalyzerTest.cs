@@ -6,7 +6,7 @@ namespace TradeAppSample.Test
     public class TrendAnalyzerTest
     {
         [TestMethod]
-        public void AnalyzeShouldReturnUpWhenInputLineIsInUpTrend()
+        public void ShouldReturnUpWhenInputLineIsInUpTrend()
         {
             var trendLine = new double[] { 100, 101, 102, 103, 104, 105 };
             var analyzer = new TrendAnalyzer();
@@ -15,7 +15,7 @@ namespace TradeAppSample.Test
         }
 
         [TestMethod]
-        public void AnalyzeShouldReturnDownWhenInputLineIsInDownTrend()
+        public void ShouldReturnDownWhenInputLineIsInDownTrend()
         {
             var trendLine = new double[] { 100, 99, 98, 97, 96, 95 };
             var analyzer = new TrendAnalyzer();
@@ -24,7 +24,7 @@ namespace TradeAppSample.Test
         }
 
         [TestMethod]
-        public void AnalyzeShouldReturnSidewaysWhenInputLineIsInSidewayTrend()
+        public void ShouldReturnSidewaysWhenInputLineIsInSidewayTrend()
         {
             var trendLine = new double[] { 100, 100, 100, 100, 100, 100 };
             var analyzer = new TrendAnalyzer();
