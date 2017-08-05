@@ -1,7 +1,8 @@
 ﻿using System;
+using TradeAppSample.ForexTrading;
 using TradeAppSample.Shared;
 
-namespace TradeAppSample.ForexTrading.MarketSignalDetection
+namespace TradeAppSample.TradingStrategies.MarketSignalDetection
 {
     public abstract class MarketSignalDetectedEvent<T> : EventBase
         where T: MarketSignal

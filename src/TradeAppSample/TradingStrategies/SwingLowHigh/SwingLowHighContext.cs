@@ -1,6 +1,6 @@
 ﻿using TradeAppSample.ForexTrading;
 
-namespace TradeAppSample.ForexTrading.TradingStrategies.SwingLowHigh
+namespace TradeAppSample.TradingStrategies.SwingLowHigh
 {
     public class SwingLowHighContext
     {

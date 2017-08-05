@@ -1,6 +1,7 @@
 ﻿using System;
+using TradeAppSample.ForexTrading;
 
-namespace TradeAppSample.ForexTrading.MarketSignalDetection
+namespace TradeAppSample.TradingStrategies.MarketSignalDetection
 {
     public class BuySignalDetectedEvent : MarketSignalDetectedEvent<BuySignal>
     {
