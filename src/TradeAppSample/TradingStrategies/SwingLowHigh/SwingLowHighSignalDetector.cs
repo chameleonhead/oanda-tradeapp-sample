@@ -1,5 +1,5 @@
 ﻿using TradeAppSample.ForexTrading;
-using TradeAppSample.MarketSignalDetection;
+using TradeAppSample.TradingStrategies.MarketSignalDetection;
 
 namespace TradeAppSample.TradingStrategies.SwingLowHigh
 {
